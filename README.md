@@ -1,4 +1,4 @@
-# Repository for the nextNEOpi Chapter Scripts
+# Repository for the nextNEOpi Chapter scripts
 
 Within this chapter, we utilize the ```nextNEOpi``` pipeline to conduct an analysis of genomic and transcriptomic data derived from several biopsy sites of three patients with lung tumors (```Sharma et al. 2019```). This investigation illustrates how nextNEOpi aids in detecting potential canonical neoantigens, neoantigens arising from fusions, and other cancer-related attributes crucial for immunotherapy.
 
