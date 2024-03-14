@@ -219,7 +219,7 @@ All_combined_Sharma_TMB$Patient = str_split_fixed(All_combined_Sharma_TMB$Sample
 
 # ------------------------------------------------------------------
 
-Sharma_TCR <- list.files(paste0(fastq_folder, "analyses/"), pattern = '*_tumor_RNA_mixcr.clones_TRAD.tsv', recursive = T, full.names = T)
+Sharma_TCR <- list.files(paste0(fastq_folder, "analyses/"), pattern = '*_tumor_RNA_mixcr.clones_TRB.tsv', recursive = T, full.names = T)
 
 Samples = as.data.frame(Sharma_TCR)
 Samples = str_split_fixed(Samples$Sharma_TCR, "/", n = 9)[,7]
