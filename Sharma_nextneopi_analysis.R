@@ -7,7 +7,7 @@ library(DiversitySeq)
 library(reshape2)
 
 # Set path to nextNEOpi result folder, plots will be exported to this folder as well.
-fastq_folder = "/path/to/your/nextNEOpi_result_folder/"
+fastq_folder = "/path/to/nextNEOpi_results/"
 
 # Read in final result table containing the neoantigens
 Sharma <- list.files(paste0(fastq_folder, "neoantigens/"), 
@@ -52,17 +52,18 @@ All_combined_sharma_mean = subset(All_combined_sharma_mean, All_combined_sharma_
 plot_violin <- function(input_1, input_2, input_3, input_4) {
   All_combined = subset(input_1, input_1$Shared_among_regions > input_3)
   All_combined = All_combined[!duplicated(All_combined[c("MT Epitope Seq")]), ]
+  All_combined = All_combined[order(All_combined$Shared_among_regions), ]
   ggplot(All_combined, aes(y=get(input_2), x=Patient)) + 
     geom_violin(trim = FALSE) +
     geom_jitter(aes(color = as.factor(Shared_among_regions)), size = 2, alpha = 1) +
     ggtitle(input_4) +
-    scale_color_manual(values = c("#99CCFF", "orange", "black", "red")) +
+    scale_color_manual(values = c("#d0e1f2", "#4a98c9", "#fc8a6a", "#bc141a")) +
     theme(panel.spacing.y = unit(2, "mm"), strip.text.x = element_text(size = 16), panel.spacing.x = unit(2, "mm")) +
     labs(x = "", y = input_2, color = "Shared regions") +
     theme_minimal() +
-    theme(axis.text=element_text(size=18), axis.text.y = element_text(angle = 90, hjust = 0.5),
-          axis.title = element_text(size=20), plot.title = element_text(size=20), 
-          legend.title = element_text(size=15), legend.text = element_text(size=15))
+    theme(axis.text=element_text(size=16), axis.text.y = element_text(angle = 90, hjust = 0.5),
+          axis.title = element_text(size=18), plot.title = element_text(size=20), 
+          legend.title = element_text(size=18), legend.text = element_text(size=18))
 }
 
 All_combined_sharma_mean$`Median Fold Change` = log10(as.numeric(All_combined_sharma_mean$`Median Fold Change`))
@@ -70,10 +71,10 @@ All_combined_sharma_mean$`Best MT IC50 Score` = log10(All_combined_sharma_mean$`
 All_combined_sharma_mean$`Gene Expression` = log10(All_combined_sharma_mean$`Gene Expression`)
 All_combined_sharma_mean$CCF.05 = round(All_combined_sharma_mean$CCF.05, 1)
 
-Gene = plot_violin(All_combined_sharma_mean, "Gene Expression", 0, "")
+Gene = plot_violin(All_combined_sharma_mean, "Gene Expression", 0, "") ##
 Score = plot_violin(All_combined_sharma_mean, "Best MT IC50 Score", 0, "")
 Perc = plot_violin(All_combined_sharma_mean, "Best MT Percentile", 0, "")
-FC = plot_violin(All_combined_sharma_mean, "Median Fold Change", 0, "")
+FC = plot_violin(All_combined_sharma_mean, "Median Fold Change", 0, "") ##
 CCF = plot_violin(All_combined_sharma_mean, "CCF", 0, "")
 CCF05 = plot_violin(All_combined_sharma_mean, "CCF.05", 0, "")
 CCF95 = plot_violin(All_combined_sharma_mean, "CCF.95", 0, "")
@@ -81,7 +82,7 @@ pC = plot_violin(All_combined_sharma_mean, "pClonal", 0, "")
 pS = plot_violin(All_combined_sharma_mean, "pSubclonal", 0, "")
 
 wrap_plots(Gene, Score, Perc, FC, CCF, CCF05, CCF95, pC, pS, ncol =	3, nrow = 3, guides = "collect") + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 25))
-ggsave(filename = paste0(fastq_folder, "violin.jpeg"), plot = last_plot(), width = 18, height = 12 )
+ggsave(filename = paste0(fastq_folder, "violin.pdf"), plot = last_plot(), width =18, height = 12,  dpi = 300, device = "pdf")
 
 # ------------------------------------------------------------------
 
@@ -101,10 +102,12 @@ ggplot(All_TSAs, aes(y=Freq, x=Var1, fill = Patient)) +
     ylab("Neoantigens") +
     xlab("Sample") +
     ylim(0,400) +
+    theme_minimal() +
+    scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9")) +
     scale_x_discrete(labels=c("R1","R2","R3", "R1","R2","R3", "R1","R2","R3", "R4")) +
     theme(axis.text=element_text(size=30), axis.title = element_text(size=25), plot.title = element_text(size=25), 
           legend.title = element_text(size=24), legend.text = element_text(size=24))
-ggsave(filename = paste0(fastq_folder, "barplot.jpeg"), plot = last_plot(), width = 18, height = 12 )
+ggsave(filename = paste0(fastq_folder, "barplot.pdf"), plot = last_plot(), width = 18, height = 12,  dpi = 300, device = "pdf")
 
 # ------------------------------------------------------------------
 
@@ -112,7 +115,7 @@ ggsave(filename = paste0(fastq_folder, "barplot.jpeg"), plot = last_plot(), widt
 
 # ------------------------------------------------------------------
 
-Sharma_fusions <- list.files(paste0(fastq_folder, "neoantigens/"), pattern = '*_I_filtered_ref_match.tsv', recursive = T, full.names = T)
+Sharma_fusions <- list.files(paste0(fastq_folder, "neoantigens/"), pattern = '*_NeoFuse_MHC_Class_I_filtered_ref_match.tsv', recursive = T, full.names = T)
 
 # extract the sample name from the file name
 Samples = as.data.frame(Sharma_fusions)
@@ -147,17 +150,18 @@ All_combined_Sharma_fusions <- All_combined_Sharma_fusions %>%
 
 All_combined_Sharma_fusions$Fusion
 ggplot(All_combined_Sharma_fusions, aes(y=Gene1_TPM, x=Gene2_TPM)) + 
-  geom_point(size=4, aes(color = as.factor(Shared_among_regions))) +
-  ggtitle("Fusion neoantigens") +
+  geom_point(size=6, aes(color = as.factor(Shared_among_regions))) +
+  ggtitle("") +
   #geom_text(size=4, aes(label = Fusion), color = "black") +
   theme(panel.spacing.y = unit(2, "mm"), strip.text.x = element_text(size = 16), panel.spacing.x = unit(2, "mm")) +
   facet_wrap(~Patient) +
-  ylab("log(TPM+1) Gene1") +
-  xlab("log(TPM+1) Gene2") +
+  ylab("log(TPM+1) Fusion gene 1") +
+  xlab("log(TPM+1) Fusion gene 2") +
+  scale_color_manual(values = c("#4a98c9","#bc141a")) +
   labs(color = "Shared regions") +
-  theme(axis.text=element_text(size=22), axis.title = element_text(size=25), plot.title = element_text(size=25), 
+  theme(axis.text=element_text(size=22), axis.title = element_text(size=22), plot.title = element_text(size=25), 
         legend.title = element_text(size=18), legend.text = element_text(size=18))
-ggsave(filename = paste0(fastq_folder, "fusions.jpeg"), plot = last_plot(), width = 18, height = 12 )
+ggsave(filename = paste0(fastq_folder, "fusions.pdf"), plot = last_plot(), width = 12, height = 7,  dpi = 300, device = "pdf")
 
 # ------------------------------------------------------------------
 
@@ -277,12 +281,47 @@ plot_extra <- function(input_1, input_2) {
           legend.title = element_text(size=18), legend.text = element_text(size=18))
 }
 
-Richness = plot_extra("Richness", "RNA T TCR Richness")
-Shannon = plot_extra("Shannon", "RNA T TCR Shannon")
-Eveness = plot_extra("Eveness", "RNA T TCR Eveness")
+Richness = plot_extra("Richness", "RNA T TRB Richness")
+Shannon = plot_extra("Shannon", "RNA T TRB Shannon")
+Eveness = plot_extra("Eveness", "RNA T TRB Eveness")
 TMB = plot_extra("Mutational load (variants/Mbps).x", "TMB")
 TMB_clonal = plot_extra("Mutational load clonal (variants/Mbps).x", "TMB clonal")
 TMB_clonal_coding = plot_extra("Mutational load (variants/Mbps).y", "TMB clonal coding")
 
-wrap_plots(TMB, TMB_clonal, TMB_clonal_coding, Richness, Shannon, Eveness, ncol =	3, nrow = 2, guides = "collect") + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 25))
-ggsave(filename = paste0(fastq_folder, "patient_features.jpeg"), plot = last_plot(), width = 18, height = 12 )
+wrap_plots(TMB, TMB_clonal, Richness, Shannon, ncol =	2, nrow = 2, guides = "collect") + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 25))
+ggsave(filename = paste0(fastq_folder, "patient_features.pdf"), plot = last_plot(), width = 18, height = 12,  dpi = 300, device = "pdf")
+
+# NeoFuse
+All_combined_Sharma_fusions$Count <- 1
+All_combined_Sharma_fusions <- All_combined_Sharma_fusions %>% mutate(Binder = case_when(
+  Rank < 2 & Rank > 0.5  ~ "WB",
+  Rank < 0.5 ~ "SB",
+  Rank > 2 ~ "NO"))
+
+ggplot(All_combined_Sharma_fusions, aes(y=Count, x=Confidence, fill=Binder, color =Binder)) + 
+  geom_bar(position="stack", stat="identity", size = 0.3) +  # Remove white lines by setting color to NA
+  geom_text(aes(label = after_stat(y), group = Confidence), size = 7.5, stat = 'summary', fun = sum, vjust = -0.5, color = "black") +
+  ggtitle("") +
+  scale_x_discrete(drop=FALSE) +
+  scale_fill_manual(values = c("#bc141a", "#4a98c9")) +  # Custom fill colors
+  scale_color_manual(values = c("#bc141a", "#4a98c9")) +  # Matching color to fill to remove white lines
+  ylim(0,50) +
+  facet_wrap(~Sample) +
+  ylab("Fusion neoantigen binders") +
+  xlab("Confidence") +
+  theme_minimal() +
+  theme(
+    panel.spacing.y = unit(5, "mm"), 
+    strip.text.x = element_text(size = 22),  # Increased facet title size
+    axis.text=element_text(size=22), 
+    axis.title = element_text(size=25), 
+    plot.title = element_text(size=25), 
+    legend.title = element_text(size=18), 
+    legend.text = element_text(size=18),
+    strip.background = element_blank(),  # Optional: remove facet box background
+    strip.placement = "outside"          # Place facet labels outside if desired
+  )
+
+ggsave(filename = paste0(fastq_folder, "fusions_binders.pdf"), plot = last_plot(), width = 10, height = 8,  dpi = 300, device = "pdf")
+
+
