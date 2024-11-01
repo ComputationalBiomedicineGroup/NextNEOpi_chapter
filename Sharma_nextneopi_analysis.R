@@ -59,7 +59,7 @@ plot_violin <- function(input_1, input_2, input_3, input_4) {
     ggtitle(input_4) +
     scale_color_manual(values = c("#d0e1f2", "#4a98c9", "#fc8a6a", "#bc141a")) +
     theme(panel.spacing.y = unit(2, "mm"), strip.text.x = element_text(size = 16), panel.spacing.x = unit(2, "mm")) +
-    labs(x = "", y = input_2, color = "Shared regions") +
+    labs(x = "", y = input_2, color = "N. shared biopsies") +
     theme_minimal() +
     theme(axis.text=element_text(size=16), axis.text.y = element_text(angle = 90, hjust = 0.5),
           axis.title = element_text(size=18), plot.title = element_text(size=20), 
@@ -148,7 +148,7 @@ All_combined_Sharma_fusions <- All_combined_Sharma_fusions %>%
   ) %>%
   ungroup()
 
-All_combined_Sharma_fusions$Fusion
+as.data.frame(table(All_combined_Sharma_fusions$Fusion_Peptide))
 ggplot(All_combined_Sharma_fusions, aes(y=Gene1_TPM, x=Gene2_TPM)) + 
   geom_point(size=6, aes(color = as.factor(Shared_among_regions))) +
   ggtitle("") +
@@ -158,7 +158,7 @@ ggplot(All_combined_Sharma_fusions, aes(y=Gene1_TPM, x=Gene2_TPM)) +
   ylab("log(TPM+1) Fusion gene 1") +
   xlab("log(TPM+1) Fusion gene 2") +
   scale_color_manual(values = c("#4a98c9","#bc141a")) +
-  labs(color = "Shared regions") +
+  labs(color = "N. shared biopsies") +
   theme(axis.text=element_text(size=22), axis.title = element_text(size=22), plot.title = element_text(size=25), 
         legend.title = element_text(size=18), legend.text = element_text(size=18))
 ggsave(filename = paste0(fastq_folder, "fusions.pdf"), plot = last_plot(), width = 12, height = 7,  dpi = 300, device = "pdf")
@@ -298,6 +298,7 @@ All_combined_Sharma_fusions <- All_combined_Sharma_fusions %>% mutate(Binder = c
   Rank < 0.5 ~ "SB",
   Rank > 2 ~ "NO"))
 
+All_combined_Sharma_fusions$Confidence <- factor(All_combined_Sharma_fusions$Confidence, levels = c("low", "medium", "high"))
 ggplot(All_combined_Sharma_fusions, aes(y=Count, x=Confidence, fill=Binder, color =Binder)) + 
   geom_bar(position="stack", stat="identity", size = 0.3) +  # Remove white lines by setting color to NA
   geom_text(aes(label = after_stat(y), group = Confidence), size = 7.5, stat = 'summary', fun = sum, vjust = -0.5, color = "black") +
@@ -312,7 +313,7 @@ ggplot(All_combined_Sharma_fusions, aes(y=Count, x=Confidence, fill=Binder, colo
   theme_minimal() +
   theme(
     panel.spacing.y = unit(5, "mm"), 
-    strip.text.x = element_text(size = 22),  # Increased facet title size
+    strip.text.x = element_text(size = 20),  # Increased facet title size
     axis.text=element_text(size=22), 
     axis.title = element_text(size=25), 
     plot.title = element_text(size=25), 
@@ -322,6 +323,5 @@ ggplot(All_combined_Sharma_fusions, aes(y=Count, x=Confidence, fill=Binder, colo
     strip.placement = "outside"          # Place facet labels outside if desired
   )
 
-ggsave(filename = paste0(fastq_folder, "fusions_binders.pdf"), plot = last_plot(), width = 10, height = 8,  dpi = 300, device = "pdf")
-
+ggsave(filename = paste0(fastq_folder, "fusions_binders.pdf"), plot = last_plot(), width = 11, height = 8,  dpi = 300, device = "pdf")
 
